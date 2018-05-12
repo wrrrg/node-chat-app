@@ -5,9 +5,22 @@
     <title>Chat App</title>
   </head>
   <body>
-    <h1>The home page for chat app!</h1>
+    <p>The home page for chat app!</p>
+
+    <p>A second paragraph tag</p>
+
+    <ol id="messages">
+
+    </ol>
+
+    <form id="send-message" action="index.html" method="post">
+      <input type="text" name="message" placeholder="type message here"/>
+      <button>Send</button>
+    </form>
+
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/libs/jquery-3.3.1.min.js"></script>
     <script type="text/javascript" src="/js/index.js"></script>
   </body>
 </html>

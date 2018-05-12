@@ -3,6 +3,7 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 
+const { generateMessage } = require("./utils/message");
 const PORT = process.env.PORT || 3000;
 const publicPath = path.join(__dirname, "../public");
 var app = express();
@@ -19,17 +20,15 @@ app.use(express.static(publicPath));
 io.on("connection", socket => {
   console.log("New user connected");
 
-  socket.emit("newMessage", {
-    from: "admin",
-    text: "welcome to the chat app",
-    createdAt: new Date().getTime()
-  });
+  socket.emit(
+    "newMessage",
+    generateMessage("admin", "welcome to the chat app")
+  );
 
-  socket.broadcast.emit("newMessage", {
-    from: "Admin",
-    text: "new user has joined chat",
-    createdAt: new Date().getTime()
-  });
+  socket.broadcast.emit(
+    "newMessage",
+    generateMessage("admin", "new user has joined chat")
+  );
 
   // socket.emit("newEmail", {
   //   from: "me@me.com",
@@ -47,22 +46,20 @@ io.on("connection", socket => {
   //   console.log("createEmail", newEmail);
   // });
 
-  socket.on("createMessage", newMessage => {
-    console.log("new message: ", newMessage);
+  socket.on("createMessage", (message, callback) => {
+    console.log("createMessage", message);
 
     //this broadcasts to every connection
-    // io.emit("newMessage", {
-    //   from: newMessage.from,
-    //   text: newMessage.text,
-    //   createdAt: new Date().getTime()
-    // });
+    io.emit("newMessage", generateMessage(message.from, message.text));
+
+    // callback for acknowledgements as written in index.js
+    callback("callback string from server.js");
 
     // broadcast.emit will send to everyone except for this socket
-    socket.broadcast.emit("newMessage", {
-      from: newMessage.from,
-      text: newMessage.text,
-      createdAt: new Date().getTime()
-    });
+    // socket.broadcast.emit(
+    //   "newMessage",
+    //   generateMessage(message.from, message.text)
+    // );
   });
 
   socket.on("disconnect", socket => {
