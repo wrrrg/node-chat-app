@@ -8,10 +8,10 @@ socket.on("connect", function() {
   //   text: "hey this is me"
   // });
 
-  socket.emit("createMessage", {
-    from: "client-bill",
-    text: "message back to the server from bill"
-  });
+  // socket.emit("createMessage", {
+  //   from: "client-bill",
+  //   text: "message back to the server from bill"
+  // });
 });
 
 socket.on("disconnect", function() {
