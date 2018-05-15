@@ -1,11 +1,12 @@
-const path = require("path");
-const http = require("http");
-const express = require("express");
-const socketIO = require("socket.io");
+const path = require('path');
+const http = require('http');
+const express = require('express');
+const socketIO = require('socket.io');
 
-const { generateMessage, generateLocationMessage } = require("./utils/message");
+const { generateMessage, generateLocationMessage } = require('./utils/message');
+const { isRealString } = require('./utils/validation');
 const PORT = process.env.PORT || 3000;
-const publicPath = path.join(__dirname, "../public");
+const publicPath = path.join(__dirname, '../public');
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
@@ -17,18 +18,8 @@ app.use(express.static(publicPath));
 // });
 
 //do something when a client connects to the server
-io.on("connection", socket => {
-  console.log("New user connected");
-
-  socket.emit(
-    "newMessage",
-    generateMessage("admin", "welcome to the chat app")
-  );
-
-  socket.broadcast.emit(
-    "newMessage",
-    generateMessage("admin", "new user has joined chat")
-  );
+io.on('connection', socket => {
+  console.log('New user connected');
 
   // socket.emit("newEmail", {
   //   from: "me@me.com",
@@ -46,14 +37,36 @@ io.on("connection", socket => {
   //   console.log("createEmail", newEmail);
   // });
 
-  socket.on("createMessage", (message, callback) => {
-    console.log("createMessage", message);
+  socket.on('join', (params, callback) => {
+    if (!isRealString(params.name) || !isRealString(params.room)) {
+      callback('name and roomname are required');
+    }
+
+    socket.join(params.room);
+
+    socket.emit(
+      'newMessage',
+      generateMessage('admin', 'welcome to the chat app')
+    );
+
+    socket.broadcast
+      .to(params.room)
+      .emit(
+        'newMessage',
+        generateMessage('admin', `${params.name} has joined ${params.room}`)
+      );
+
+    callback();
+  });
+
+  socket.on('createMessage', (message, callback) => {
+    console.log('createMessage', message);
 
     //this broadcasts to every connection
-    io.emit("newMessage", generateMessage(message.from, message.text));
+    io.emit('newMessage', generateMessage(message.from, message.text));
 
     // callback for acknowledgements as written in index.js
-    callback("callback string from server.js");
+    callback('callback string from server.js');
 
     // broadcast.emit will send to everyone except for this socket
     // socket.broadcast.emit(
@@ -62,15 +75,15 @@ io.on("connection", socket => {
     // );
   });
 
-  socket.on("createLocationMessage", coords => {
+  socket.on('createLocationMessage', coords => {
     io.emit(
-      "newLocationMessage",
-      generateLocationMessage("admin", coords.latitude, coords.longitude)
+      'newLocationMessage',
+      generateLocationMessage('admin', coords.latitude, coords.longitude)
     );
   });
 
-  socket.on("disconnect", socket => {
-    console.log("Client has disconnected");
+  socket.on('disconnect', socket => {
+    console.log('Client has disconnected');
   });
 });
 
