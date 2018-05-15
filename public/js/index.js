@@ -1,85 +1,104 @@
-var socket = io();
+var socket = io()
 
-socket.on("connect", function() {
-  console.log("Connected to server");
-});
+socket.on('connect', function() {
+  console.log('Connected to server')
+})
 
-socket.on("disconnect", function() {
-  console.log("Disconnected from server");
-});
+socket.on('disconnect', function() {
+  console.log('Disconnected from server')
+})
 
-socket.on("newMessage", function(message) {
-  console.log("newMessage", message);
-  var formattedTime = moment(message.createdAt).format("h:mm a");
+socket.on('newMessage', function(message) {
+  var formattedTime = moment(message.createdAt).format('h:mm a')
+  var template = $('#message-template').html()
+  var html = Mustache.render(template, {
+    from: 'User',
+    text: message.text,
+    createdAt: formattedTime
+  })
 
-  var li = $("<li></li>");
-  li.text(`${message.from} (${formattedTime}): ${message.text}`);
+  $('#messages').append(html)
 
-  $("#messages").append(li);
-});
+  // console.log("newMessage", message);
+  // var formattedTime = moment(message.createdAt).format("h:mm a");
+  //
+  // var li = $("<li></li>");
+  // li.text(`${message.from} (${formattedTime}): ${message.text}`);
+  //
+  // $("#messages").append(li);
+})
 
-socket.on("newLocationMessage", function(message) {
-  var formattedTime = moment(message.createdAt).format("h:mm a");
-  var li = $("<li></li>");
-  var a = $("<a target='_blank'>My Location</a>");
+socket.on('newLocationMessage', function(message) {
+  var formattedTime = moment(message.createdAt).format('h:mm a')
+  var template = $('#location-message-template').html()
+  var html = Mustache.render(template, {
+    from: 'User',
+    url: message.url,
+    createdAt: formattedTime
+  })
 
-  li.text(`${message.from}: (${formattedTime}) `);
-  a.attr("href", message.url);
-  li.append(a);
-  $("#messages").append(li);
-});
+  $('#messages').append(html)
 
-var messageText = $("[name=message]");
+  // var li = $('<li></li>')
+  // var a = $("<a target='_blank'>My Location</a>")
+  //
+  // li.text(`${message.from}: (${formattedTime}) `)
+  // a.attr('href', message.url)
+  // li.append(a)
+  // $('#messages').append(li)
+})
 
-$("#send-message").on("submit", function(e) {
-  e.preventDefault();
+var messageText = $('[name=message]')
+
+$('#send-message').on('submit', function(e) {
+  e.preventDefault()
 
   socket.emit(
-    "createMessage",
+    'createMessage',
     {
-      from: "User",
+      from: 'User',
       text: messageText.val()
     },
     function() {
-      messageText.val("");
+      messageText.val('')
     }
-  );
-});
+  )
+})
 
-var locationButton = $("#send-location");
+var locationButton = $('#send-location')
 
-locationButton.on("click", function() {
-  locationButton.html("Sending Location");
+locationButton.on('click', function() {
+  locationButton.html('Sending Location')
 
   if (!navigator.geolocation) {
-    return alert("geolocation not supported");
+    return alert('geolocation not supported')
   } else {
-    locationButton.attr("disabled", "disabled");
+    locationButton.attr('disabled', 'disabled')
     navigator.geolocation.getCurrentPosition(
       function(position) {
-        socket.emit("createLocationMessage", {
+        socket.emit('createLocationMessage', {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
-        });
-        locationButton.html("Location Sent");
+        })
+        locationButton.html('Location Sent')
 
         var enableLocationButton = function() {
-          locationButton.removeAttr("disabled");
-          locationButton.html("Send Location");
-        };
+          locationButton.removeAttr('disabled')
+          locationButton.html('Send Location')
+        }
 
-        setTimeout(enableLocationButton, 1000);
+        setTimeout(enableLocationButton, 1000)
       },
       function() {
-        alert("unable to fetch location");
+        alert('unable to fetch location')
 
         var enableLocationButton = function() {
-          locationButton.removeAttr("disabled");
-          locationButton.html("Send Location");
-        };
+          locationButton.removeAttr('disabled')
+          locationButton.html('Send Location')
+        }
 
-        setTimeout(enableLocationButton, 1000);
+        setTimeout(enableLocationButton, 1000)
       }
-    );
+    )
   }
-});
+})
