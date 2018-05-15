@@ -18,4 +18,7 @@ var generateLocationMessage = (from, latitude, longitude) => {
 
 var test = from => {};
 
-module.exports = { generateMessage, generateLocationMessage };
+module.exports = {
+  generateMessage,
+  generateLocationMessage
+};
