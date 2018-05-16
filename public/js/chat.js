@@ -36,11 +36,28 @@ socket.on('disconnect', function() {
   console.log('Disconnected from server');
 });
 
+socket.on('updateUserList', function(users) {
+  console.log('Users list: ', users);
+
+  // var template = $('#user-template').html();
+  var ol = jQuery('<ol></ol>');
+  // for (var i = 0; i < users.length; i++) {
+  //   var html = `<li>${users[i]}</li>`;
+  //
+  //   $('ol').append(html);
+  // }
+  users.forEach(function(user) {
+    ol.append(jQuery('<li></li>').text(user));
+  });
+
+  $('#users').html(ol);
+});
+
 socket.on('newMessage', function(message) {
   var formattedTime = moment(message.createdAt).format('h:mm a');
   var template = $('#message-template').html();
   var html = Mustache.render(template, {
-    from: 'User',
+    from: message.from,
     text: message.text,
     createdAt: formattedTime
   });

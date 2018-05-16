@@ -53,7 +53,7 @@ describe('Users', () => {
   });
 
   it('should not return a user with an invalid id', () => {
-    expect(users.getUser('25')).toEqual('No user found');
+    expect(users.getUser('25')).toNotExist();
   });
 
   it('should remove a user given a valid id', () => {
@@ -67,8 +67,8 @@ describe('Users', () => {
 
   it('should not remove a user with an invalid id', () => {
     var userId = '305';
-    var array = users.removeUser(userId);
-    expect(users.getUser(userId)).toBe('No user found');
+    var user = users.removeUser(userId);
+    expect(user).toNotExist();
     expect(users.users.length).toBe(3);
   });
 });
