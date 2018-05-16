@@ -65,14 +65,23 @@ io.on('connection', socket => {
   });
 
   socket.on('createMessage', (message, callback) => {
-    console.log('createMessage', message);
+    // console.log('createMessage', message);
     user = users.getUser(socket.id);
 
-    //this broadcasts to every connection
-    io.emit('newMessage', generateMessage(user.name, message.text));
+    if (user && isRealString(message.text)) {
+      //this broadcasts to every connection
+      io
+        .to(user.room)
+        .emit('newMessage', generateMessage(user.name, message.text));
 
-    // callback for acknowledgements as written in index.js
-    callback('callback string from server.js');
+      // callback for acknowledgements as written in index.js
+      callback('callback string from server.js');
+    }
+    // //this broadcasts to every connection
+    // io.emit('newMessage', generateMessage(user.name, message.text));
+    //
+    // // callback for acknowledgements as written in index.js
+    // callback('callback string from server.js');
 
     // broadcast.emit will send to everyone except for this socket
     // socket.broadcast.emit(
@@ -82,10 +91,16 @@ io.on('connection', socket => {
   });
 
   socket.on('createLocationMessage', coords => {
-    io.emit(
-      'newLocationMessage',
-      generateLocationMessage('admin', coords.latitude, coords.longitude)
-    );
+    var user = users.getUser(socket.id);
+
+    if (user) {
+      io
+        .to(user.room)
+        .emit(
+          'newLocationMessage',
+          generateLocationMessage(user.name, coords.latitude, coords.longitude)
+        );
+    }
   });
 
   socket.on('disconnect', () => {
